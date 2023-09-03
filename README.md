@@ -26,4 +26,4 @@ Will only output directories and omit files
 npx dir-tree-to-json <directory-path> --extensions=mp4,json
 ```
 
-Will only output files that ends with the provided extensions, if `--only-directory`` is present, this flag will be ignored
+Will only output files that ends with the provided extensions, if `--only-directory` is present, this flag will be ignored
