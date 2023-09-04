@@ -4,8 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 function readDirectory(directoryPath, options) {
-  const stats = fs.statSync(directoryPath);
-  const result = { size: humanFileSize(stats.size), children: {} };
+  const result = { size: humanFileSize(getDirSize(directoryPath)), children: {} };
 
   try {
     const files = fs.readdirSync(directoryPath);
@@ -35,6 +34,23 @@ function readDirectory(directoryPath, options) {
   if (Object.keys(result.children).length === 0) delete result.children;
   return result;
 }
+const getDirSize = (dirPath) => {
+  let size = 0;
+  const files = fs.readdirSync(dirPath);
+
+  for (let i = 0; i < files.length; i++) {
+    const filePath = path.join(dirPath, files[i]);
+    const stats = fs.statSync(filePath);
+
+    if (stats.isFile()) {
+      size += stats.size;
+    } else if (stats.isDirectory()) {
+      size += getDirSize(filePath);
+    }
+  }
+
+  return size;
+};
 function humanFileSize(bytes, si = false, dp = 1) {
   const thresh = si ? 1000 : 1024;
 
