@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 function readDirectory(directoryPath, options) {
-  const result = { size: humanFileSize(getDirSize(directoryPath)), children: {} };
+  const result = { size: 0, children: {} };
 
   try {
     const files = fs.readdirSync(directoryPath);
@@ -14,12 +14,15 @@ function readDirectory(directoryPath, options) {
         const stats = fs.statSync(filePath);
         if (stats.isDirectory()) {
           result.children[file] = readDirectory(filePath, options);
+          result.size += result.children[file].size;
+          result.children[file].size = humanFileSize(result.children[file].size);
         } else if (!options.onlyDirectory) {
           if (
             options.extensions.length === 0 ||
             options.extensions.includes(path.extname(file).slice(1))
           ) {
             result.children[file] = humanFileSize(stats.size);
+            result.size += stats.size;
           }
         }
       } catch (e) {
@@ -35,7 +38,6 @@ function readDirectory(directoryPath, options) {
   return result;
 }
 const getDirSize = (dirPath) => {
-  let size = 0;
   const files = fs.readdirSync(dirPath);
 
   for (let i = 0; i < files.length; i++) {
@@ -96,4 +98,5 @@ if (!directoryPath) {
 }
 
 const data = readDirectory(directoryPath, options);
+data.size = humanFileSize(data.size);
 exportToJson(data, `${path.join(process.cwd(), path.parse(directoryPath).name)}.json`);
